@@ -43,9 +43,9 @@ df_cert['id'] = df_cert.apply(obter_id_filme, axis=1)
 # %%
 df_cert['id'].value_counts()
 df_cert[df_cert['id'] == 0]['Series_Title']
-# Vamos coletar os dois valores faltantes manualmente: 'Arsenic and Old Lace' -> 212; 'This is England' -> 11798
 
 # %%
+# Vamos coletar os dois valores faltantes manualmente: 'Arsenic and Old Lace' -> 212; 'This is England' -> 11798
 df_cert.loc[df_cert['Series_Title'] == 'Arsenic and Old Lace', 'id'] = 212
 df_cert.loc[df_cert['Series_Title'] == 'This is England', 'id'] = 11798
 
@@ -115,6 +115,33 @@ translation_dict = {'12': 12,
 df_cert['certificate'] = df_cert['certificate'].map(translation_dict)
 
 # %%
-df_cert.drop(columns='id', axis=1).to_csv('C:\\Users\\bruno\\Documents\\LH_CD_BRUNOBERTHOLDI\\data/certificates.csv')
+# Exporta DataFrame com certificados já traduzidos para arquivo csv
+df_cert.drop(columns='id', axis=1).to_csv('certificates.csv')
 
 # %%
+# Importa DataFrame com títulos de filmes que não possuem meta_score alocado
+meta_null = pd.read_csv('https://raw.githubusercontent.com/bert-bruno/LH_CD_BRUNOBERTHOLDI/main/data/meta_null.csv')
+meta_null.head()
+
+# %%
+# Define função de obtenção de meta_score
+def obter_meta_score(row):
+    
+    response = buscar_filme(row['Series_Title'], row['Released_Year'])
+
+    if response and 'results' in response and len(response['results']) > 0:
+        return response['results'][0]['vote_average']
+    else:
+        return 000000
+    
+# %%
+# Adiciona a coluna 'meta_score' ao DataFrame meta_null
+meta_null['meta_score'] = meta_null.apply(obter_meta_score, axis=1)
+
+# %%
+# Multiplica meta_score por 10 para manter a consistência com o dataset original
+meta_null['meta_score'] = meta_null['meta_score'].apply(lambda x: x*10)
+
+# %%
+# Exporta DataFrame com meta_scores já alocados para arquivo csv
+meta_null.to_csv('meta_scores.csv')
