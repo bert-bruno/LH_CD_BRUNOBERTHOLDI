@@ -115,6 +115,6 @@ translation_dict = {'12': 12,
 df_cert['certificate'] = df_cert['certificate'].map(translation_dict)
 
 # %%
-df_cert['certificate'].describe()
+df_cert.drop(columns='id', axis=1).to_csv('C:\\Users\\bruno\\Documents\\LH_CD_BRUNOBERTHOLDI\\data/certificates.csv')
 
 # %%
